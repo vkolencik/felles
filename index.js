@@ -92,6 +92,9 @@ function handleMessage(sender_psid, received_message) {
 
 // Handles messaging_postbacks events
 function handlePostback(sender_psid, received_postback) {
+    if (received_postback === "getStartedPostback") {
+        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"})
+    }
 }
 
 function callSendAPI(sender_psid, response) {
@@ -139,4 +142,8 @@ function setUpProfile() {
             console.error("Unable to access profile api:" + err);
         }
     });
+}
+
+function databaseInitialize() {
+
 }
