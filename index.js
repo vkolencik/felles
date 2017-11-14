@@ -92,7 +92,10 @@ function handleMessage(sender_psid, received_message) {
 
 // Handles messaging_postbacks events
 function handlePostback(sender_psid, received_postback) {
-    if (received_postback === "getStartedPostback") {
+    // Get the payload for the postback
+    let payload = received_postback.payload;
+
+    if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"})
     }
 }
