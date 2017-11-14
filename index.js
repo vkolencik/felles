@@ -96,7 +96,7 @@ function handlePostback(sender_psid, received_postback) {
     let payload = received_postback.payload;
 
     if (payload === "getStartedPostback") {
-        //callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
+        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
         let branches = [
             {name: 'Nutriční terapeut', code: 'NTD'},
