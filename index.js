@@ -1,5 +1,17 @@
 'use strict';
 
+const fs = require('fs');
+const cheerio = require('cheerio');
+fs.readFile(__dirname + '\\sample_page.html', 'utf8', function(err, html) {
+    const $ = cheerio.load(html);
+    var classPanels = $('div.news-body div.panel');
+    var classNames = $('div.panel-heading *:not(:has("*"))', classPanels).map(function() { return $(this).text()}).get();
+    console.log(classNames);
+
+
+});
+
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
@@ -176,3 +188,4 @@ function setUpProfile() {
 function databaseInitialize() {
 
 }
+
