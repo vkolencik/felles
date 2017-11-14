@@ -96,7 +96,33 @@ function handlePostback(sender_psid, received_postback) {
     let payload = received_postback.payload;
 
     if (payload === "getStartedPostback") {
-        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"})
+        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
+
+        let branches = [
+            {name: 'Nutriční terapeut', code: 'NTD'},
+            {name: 'Všeobecná sestra', code: 'VSD'},
+            {name: 'Zdravotnický záchranář', code: 'ZZD'},
+            {name: 'Zdravotnický záchranář', code: 'ZZD'}
+        ];
+
+        let response = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": "Povíš mi, z jakého jsi oboru?",
+                        "buttons": branches.map(b => ({
+                            "type": "postback",
+                            "title": b.name,
+                            "payload": b.code
+                        }))
+                    }]
+                }
+            }
+        };
+
+        callSendAPI(sender_psid, response);
     }
 }
 
