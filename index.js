@@ -7,7 +7,7 @@ const schedule = require('node-schedule');
 const fs = require('fs');
 
 const dataParser = require('./lib/data_parser');
-const db = require('./lib/db');
+var db;
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
@@ -20,7 +20,6 @@ app.use(bodyParser.urlencoded({extended: false}));
 // Process application/json
 app.use(bodyParser.json());
 
-setUpBotProfile();
 
 function processClassData(body) {
     let classesData = dataParser.parseClassesHtml(body);
@@ -53,15 +52,14 @@ function fetchData() {
 }
 
 function setUpDataHook() {
+    db = require('./lib/db');
+    db.initDb('db.json').then(function() {
         schedule.scheduleJob('* * * * *', fetchData); // every minute
         fetchData();
+        // Sets server port and logs message on success
+        app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
+    });
 }
-
-setUpDataHook();
-
-// Sets server port and logs message on success
-app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
-
 
 // Creates the endpoint for our webhook 
 app.post('/webhook', (req, res) => {
@@ -210,3 +208,6 @@ function setUpBotProfile() {
         }
     });
 }
+
+setUpBotProfile();
+setUpDataHook();
