@@ -3,12 +3,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
-const loki = require('lokijs');
-const dataParser = require('lib/data_parser');
+const schedule = require('node-schedule');
+const fs = require('fs');
+
+const dataParser = require('./lib/data_parser');
+const db = require('./lib/db');
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const db = new loki('db.json');
+const CLASS_DATA_URL = 'http://www.skolamedea.cz/studenti/zmeny-v-rozvrhu-2/'
+const testInstance = true;
 
 // Process application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
@@ -16,10 +20,48 @@ app.use(bodyParser.urlencoded({extended: false}));
 // Process application/json
 app.use(bodyParser.json());
 
+setUpBotProfile();
+
+function processClassData(body) {
+    let classesData = dataParser.parseClassesHtml(body);
+    classesData.forEach(classData => {
+        let existingData = db.getClass(classData.classBranch, classData.classYear, classData.classEducationType);
+        if (existingData.classDataHash !== classData.classDataHash) {
+            //notify change
+            console.log("CLASS DATA CHANGED: " + JSON.stringify(classData));
+        }
+        existingData.classDataHash = classData.classDataHash;
+        db.saveClass(existingData);
+    });
+}
+
+function fetchData() {
+    if (testInstance) {
+        fs.readFile( __dirname + '/sample_page.html', function (err, data) {
+            if (err) {
+                throw err;
+            }
+            processClassData(data);
+        });
+    } else {
+        request(CLASS_DATA_URL, function (error, response, body) {
+            if (!error) {
+                processClassData(body);
+            }
+        });
+    }
+}
+
+function setUpDataHook() {
+        schedule.scheduleJob('* * * * *', fetchData); // every minute
+        fetchData();
+}
+
+setUpDataHook();
+
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
 
-setUpBotProfile();
 
 // Creates the endpoint for our webhook 
 app.post('/webhook', (req, res) => {
@@ -168,8 +210,3 @@ function setUpBotProfile() {
         }
     });
 }
-
-function databaseInitialize() {
-    ()
-}
-
