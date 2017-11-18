@@ -4,16 +4,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
 const loki = require('lokijs');
-const getClasses = require('lib/get_classes');
+const dataParser = require('lib/data_parser');
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const db = new loki('db.json',  {
-    autoload: true,
-    autoloadCallback : databaseInitialize,
-    autosave: true,
-    autosaveInterval: 4000
-});
+const db = new loki('db.json');
 
 // Process application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
@@ -24,7 +19,7 @@ app.use(bodyParser.json());
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
 
-setUpProfile();
+setUpBotProfile();
 
 // Creates the endpoint for our webhook 
 app.post('/webhook', (req, res) => {
@@ -151,7 +146,7 @@ function callSendAPI(sender_psid, response) {
 });
 }
 
-function setUpProfile() {
+function setUpBotProfile() {
     let request_body = {
         "greeting": [{
             "locale":"default",
@@ -175,6 +170,6 @@ function setUpProfile() {
 }
 
 function databaseInitialize() {
-
+    ()
 }
 
