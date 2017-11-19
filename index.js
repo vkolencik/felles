@@ -147,7 +147,6 @@ function handlePostback(sender_psid, received_postback) {
     let payload = received_postback.payload;
 
     console.log("Received postback: " + payload);
-    console.log(payload.startsWith("response-"));
 
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
@@ -165,6 +164,7 @@ function handlePostback(sender_psid, received_postback) {
 
         switch(responseTo) {
             case 'branch':
+                console.log('Setting branch of ' + sender_psid + ' to ' + responseValue);
                 db.saveUserBranch(sender_psid, responseValue);
                 callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears(), y => "response-year-" + y));
                 break;
