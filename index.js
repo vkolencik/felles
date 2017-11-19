@@ -146,6 +146,8 @@ function handlePostback(sender_psid, received_postback) {
     // Get the payload for the postback
     let payload = received_postback.payload;
 
+    console.log("Received postback: " + payload);
+
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
