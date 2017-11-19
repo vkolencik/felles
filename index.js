@@ -160,15 +160,15 @@ function handlePostback(sender_psid, received_postback) {
 
         switch(responseTo) {
             case 'branch':
-                db.saveUserBranch(sender_psid, responseData);
+                db.saveUserBranch(sender_psid, responseValue);
                 callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears(), y => "response-year-" + y));
                 break;
             case 'year':
-                db.saveUserYear(sender_psid, parseInt(responseData));
+                db.saveUserYear(sender_psid, parseInt(responseValue));
                 callSendAPI(sender_psid, getSelectionMessage("A denní nebo kombinované studium?", ["Denní", "Kombinované"], t => "response-type-" + t.charAt(0)));
                 break;
             case 'type':
-                db.saveUserEducationType(sender_psid, responseData);
+                db.saveUserEducationType(sender_psid, responseValue);
                 callSendAPI("Super, jakmile se něco šustne tak se ozvu ;)");
                 break;
         }
