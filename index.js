@@ -61,6 +61,17 @@ function setUpDataHook() {
     });
 }
 
+app.get('/createTestUser', (req, res) => {
+    db.saveUserBranch(1, 'asdf');
+    db.saveUserYear(1, 3);
+    db.saveUserEducationType(1, 'D');
+    res.status(200).send('OK');
+});
+
+app.get('/users', (req, res) => {
+    res.status(200).send(db.getAllUsers());
+});
+
 // Creates the endpoint for our webhook 
 app.post('/webhook', (req, res) => {
 
@@ -134,32 +145,49 @@ function handlePostback(sender_psid, received_postback) {
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
-        let branches = [
-            {name: 'Nutriční terapeut', code: 'NTD'},
-            {name: 'Všeobecná sestra', code: 'VSD'},
-            {name: 'Zdravotnický záchranář', code: 'ZZD'}
-        ];
-
-        let response = {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": [{
-                        "title": "Povíš mi, z jakého jsi oboru?",
-                        "buttons": branches.map(b => ({
-                            "type": "postback",
-                            "title": b.name,
-                            "payload": b.code
-                        }))
-                    }]
-                }
-            }
-        };
+        let response = getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b);
 
         callSendAPI(sender_psid, response);
         console.log("sent " + response);
+    } else if (payload.startsWith("response-")) {
+        let responseData = payload.match(/response-([^\-]+)-(.*)/);
+        let responseTo = responseData[1];
+        let responseValue = responseData[2];
+
+        switch(responseTo) {
+            case 'branch':
+                db.saveUserBranch(sender_psid, responseData);
+                callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears(), y => "response-year-" + y));
+                break;
+            case 'year':
+                db.saveUserYear(sender_psid, parseInt(responseData));
+                callSendAPI(sender_psid, getSelectionMessage("A denní nebo kombinované studium?", ["Denní", "Kombinované"], t => "response-type-" + t.charAt(0)));
+                break;
+            case 'type':
+                db.saveUserEducationType(sender_psid, responseData);
+                callSendAPI("Super, jakmile se něco šustne tak se ozvu ;)");
+                break;
+        }
     }
+}
+
+function getSelectionMessage(title, options, createPayload) {
+    return {
+        "attachment": {
+        "type": "template",
+            "payload": {
+            "template_type": "generic",
+                "elements": [{
+                    "title": title,
+                    "buttons": db.getBranches().map(b => ({
+                        "type": "postback",
+                        "title": b,
+                        "payload": createPayload(b)
+                    }))
+                }]
+            }
+        }
+    };
 }
 
 function callSendAPI(sender_psid, response) {
