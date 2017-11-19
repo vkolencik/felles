@@ -166,7 +166,7 @@ function handlePostback(sender_psid, received_postback) {
             case 'branch':
                 console.log('Setting branch of ' + sender_psid + ' to ' + responseValue);
                 db.saveUserBranch(sender_psid, responseValue);
-                callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears(), y => "response-year-" + y));
+                callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears().map(y => y.toString()), y => "response-year-" + y));
                 break;
             case 'year':
                 db.saveUserYear(sender_psid, parseInt(responseValue));
