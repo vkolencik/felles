@@ -151,7 +151,8 @@ function handlePostback(sender_psid, received_postback) {
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
-        callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears().map(y => y.toString()), y => "response-year-" + y));
+        let response = getSelectionMessage("Cajk, a ročník?", db.getYears().map(y => y.toString()), y => "response-year-" + y);
+        callSendAPI(sender_psid, response);
 
         // let response = getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b);
         // callSendAPI(sender_psid, response);
@@ -183,7 +184,8 @@ function handlePostback(sender_psid, received_postback) {
 function getSelectionMessage(title, options, createPayload) {
     return {
         "attachment": {
-        "type": "template",
+        "type":
+            "template",
             "payload": {
             "template_type": "generic",
                 "elements": [{
