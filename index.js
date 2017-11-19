@@ -160,6 +160,8 @@ function handlePostback(sender_psid, received_postback) {
         let responseTo = responseData[1];
         let responseValue = responseData[2];
 
+        console.log(responseData);
+
         switch(responseTo) {
             case 'branch':
                 db.saveUserBranch(sender_psid, responseValue);
