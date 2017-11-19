@@ -72,7 +72,11 @@ app.get('/users', (req, res) => {
     res.status(200).send(db.getAllUsers());
 });
 
-// Creates the endpoint for our webhook 
+app.get('/years', (req, res) => {
+    res.status(200).send(db.getYears());
+});
+
+// Creates the endpoint for our webhook
 app.post('/webhook', (req, res) => {
 
     let body = req.body;
@@ -179,7 +183,7 @@ function getSelectionMessage(title, options, createPayload) {
             "template_type": "generic",
                 "elements": [{
                     "title": title,
-                    "buttons": db.getBranches().map(b => ({
+                    "buttons": options.map(b => ({
                         "type": "postback",
                         "title": b,
                         "payload": createPayload(b)
