@@ -151,10 +151,10 @@ function handlePostback(sender_psid, received_postback) {
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
-        let response = getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b);
+        callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears().map(y => y.toString()), y => "response-year-" + y));
 
-        callSendAPI(sender_psid, response);
-        console.log("sent " + response);
+        // let response = getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b);
+        // callSendAPI(sender_psid, response);
     } else if (payload.startsWith("response-")) {
         let responseData = payload.match(/response-([^\-]+)-(.*)/);
         let responseTo = responseData[1];
