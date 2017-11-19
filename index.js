@@ -200,6 +200,7 @@ function getSelectionMessage(title, options, createPayload) {
 }
 
 function callSendAPI(sender_psid, response) {
+    console.log('Sending message: ' + response);
     // Construct the message body
     let request_body = {
         "recipient": {
