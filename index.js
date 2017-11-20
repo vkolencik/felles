@@ -242,7 +242,29 @@ function setUpBotProfile() {
             "locale":"default",
             "text":"Ahoj!"
         }],
-        "get_started": { "payload" : "getStartedPostback" }
+        "get_started": { "payload" : "getStartedPostback" },
+        "persistent_menu": [
+            {
+                "locale": "default",
+                "composer_input_disabled": true,
+                "call_to_actions": [
+                    {
+                        "title": "Znovu zadat údaje",
+                        "type": "postback",
+                        "payload": "getStartedPostback"
+                    },
+                    {
+                        "title": "Odhlásit se",
+                        "type": "postback",
+                        "payload": "unsubscribe"
+                    }],
+                {
+                    "type": "web_url",
+                    "title": "Stránka se změnami rozvrhu",
+                    "url": CLASS_DATA_URL,
+                    "webview_height_ratio": "full"
+                }
+            ]
     };
 
     request({
