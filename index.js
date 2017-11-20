@@ -29,6 +29,7 @@ function processClassData(body) {
             //notify change
             console.log("CLASS DATA CHANGED: " + JSON.stringify(classData));
             let usersToNotify = db.getUsersByClass(classData);
+            console.log('Users to notify: ' + usersToNotify);
             usersToNotify.forEach(u => sendNotificationMessage(u));
             existingData.classDataHash = classData.classDataHash;
             existingData.lastUpdated = new Date();
