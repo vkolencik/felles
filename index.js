@@ -151,7 +151,7 @@ function handlePostback(sender_psid, received_postback) {
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
-        let response = getSelectionMessage("Cajk, a ročník?", db.getYears().map(y => y.toString()), y => "response-year-" + y);
+        let response = getSelectionMessage("Cajk, a ročník?", db.getBranches(), b => "response-branch-" + b);
         callSendAPI(sender_psid, response);
 
         // let response = getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b);
