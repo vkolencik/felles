@@ -11,7 +11,7 @@ var db;
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const CLASS_DATA_URL = 'http://www.skolamedea.cz/studenti/zmeny-v-rozvrhu-2/'
+const CLASS_DATA_URL = 'http://www.skolamedea.cz/studenti/zmeny-v-rozvrhu-2/';
 const testInstance = true;
 
 // Process application/x-www-form-urlencoded
@@ -28,9 +28,12 @@ function processClassData(body) {
         if (existingData.classDataHash !== classData.classDataHash) {
             //notify change
             console.log("CLASS DATA CHANGED: " + JSON.stringify(classData));
+            let usersToNotify = db.getUsersByClass(classData);
+            usersToNotify.forEach(u => sendNotificationMessage(u));
+            existingData.classDataHash = classData.classDataHash;
+            existingData.lastUpdated = new Date();
+            db.saveClass(existingData);
         }
-        existingData.classDataHash = classData.classDataHash;
-        db.saveClass(existingData);
     });
 }
 
@@ -62,14 +65,18 @@ function setUpDataHook() {
 }
 
 app.get('/createTestUser', (req, res) => {
-    db.saveUserBranch(1, 'asdf');
-    db.saveUserYear(1, 3);
+    db.saveUserBranch(1, 'Zdravotnický záchranář');
+    db.saveUserYear(1, 1);
     db.saveUserEducationType(1, 'D');
     res.status(200).send('OK');
 });
 
 app.get('/users', (req, res) => {
     res.status(200).send(db.getAllUsers());
+});
+
+app.get('/classes', (req, res) => {
+    res.status(200).send(db.getAllClasses());
 });
 
 app.get('/years', (req, res) => {
@@ -197,14 +204,20 @@ function getSelectionMessage(title, options, createPayload) {
     };
 }
 
-function callSendAPI(sender_psid, response) {
+function sendNotificationMessage(user) {
+    let messageText = 'Pssst, na ' + CLASS_DATA_URL + ' je něco nového pro ' + user.year + '. ročník ' + (user.educationType == 'D' ? 'denní' : 'kombinované') + ' formy oboru ' + user.branch + '. Pokud už nechceš dostávat tyhle zprávy tak si mě smaž nebo odpověz "nechci".';
+    callSendAPI(user.psid, { text: messageText }, 'NON_PROMOTIONAL_SUBSCRIPTION');
+}
+
+function callSendAPI(psid, response, messageType) {``
     console.log('Sending message: ' + JSON.stringify(response));
     // Construct the message body
     let request_body = {
         "recipient": {
-            "id": sender_psid
+            "id": psid
         },
-        "message": response
+        "message": response,
+        "messaging_type": messageType || 'RESPONSE'
     };
 
     // Send the HTTP request to the Messenger Platform
