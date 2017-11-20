@@ -151,11 +151,7 @@ function handlePostback(sender_psid, received_postback) {
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
-        let response = getSelectionMessage("Cajk, a ročník?", [1,2,3,4], y => "response-year-" + y);
-        callSendAPI(sender_psid, response);
-
-        // let response = getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b);
-        // callSendAPI(sender_psid, response);
+        callSendAPI(sender_psid, getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b));
     } else if (payload.startsWith("response-")) {
         let responseData = payload.match(/response-([^\-]+)-(.*)/);
         let responseTo = responseData[1];
@@ -167,7 +163,7 @@ function handlePostback(sender_psid, received_postback) {
             case 'branch':
                 console.log('Setting branch of ' + sender_psid + ' to ' + responseValue);
                 db.saveUserBranch(sender_psid, responseValue);
-                callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears().map(y => y.toString()), y => "response-year-" + y));
+                callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears().sort().slice(0, 3).map(y => y.toString()), y => "response-year-" + y));
                 break;
             case 'year':
                 db.saveUserYear(sender_psid, parseInt(responseValue));
