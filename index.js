@@ -171,7 +171,7 @@ function handlePostback(sender_psid, received_postback) {
                 break;
             case 'type':
                 db.saveUserEducationType(sender_psid, responseValue);
-                callSendAPI("Super, jakmile se něco šustne tak se ozvu ;)");
+                callSendAPI({"text": "Super, jakmile se něco šustne tak se ozvu ;)"});
                 break;
         }
     }
