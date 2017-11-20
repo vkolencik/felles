@@ -160,6 +160,9 @@ function handlePostback(sender_psid, received_postback) {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
 
         callSendAPI(sender_psid, getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b));
+    } else if (payload === "unsubscribe") {
+        db.deleteUser(sender_psid);
+        callSendAPI(sender_psid, "OK, už ti nebudu nic posílat. Těšilo mě ;)");
     } else if (payload.startsWith("response-")) {
         let responseData = payload.match(/response-([^\-]+)-(.*)/);
         let responseTo = responseData[1];
@@ -257,14 +260,16 @@ function setUpBotProfile() {
                         "title": "Odhlásit se",
                         "type": "postback",
                         "payload": "unsubscribe"
-                    }],
-                {
-                    "type": "web_url",
-                    "title": "Stránka se změnami rozvrhu",
-                    "url": CLASS_DATA_URL,
-                    "webview_height_ratio": "full"
-                }
-            ]
+                    },
+                    {
+                        "type": "web_url",
+                        "title": "Stránka se změnami rozvrhu",
+                        "url": CLASS_DATA_URL,
+                        "webview_height_ratio": "full"
+                    }
+                ]
+            }
+        ]
     };
 
     request({
