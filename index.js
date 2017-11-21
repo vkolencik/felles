@@ -12,7 +12,7 @@ const consts = require('./lib/constants');
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const testInstance = true;
+const testInstance = false;
 
 // Process application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
