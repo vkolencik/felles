@@ -8,6 +8,7 @@ const fs = require('fs');
 
 const dataParser = require('./lib/data_parser');
 var db;
+const constants = require('./lib/constants');
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
@@ -239,80 +240,52 @@ function callSendAPI(psid, response, messageType) {``
 }
 
 function setUpBotProfile() {
-    removePersistentMenu();
+    removePersistentMenu().then(function() {
+        let request_body = constants.BOT_PROFILE;
 
-    let request_body = {
-        "target_audience": {
-            "audience_type": "none" // don't show up in bot discovery
-        },
-        "greeting": [{
-            "locale":"default",
-            "text":"Ahoj!"
-        }],
-        "get_started": { "payload" : "getStartedPostback" },
-        "persistent_menu": [
-            {
-                "locale": "default",
-                "composer_input_disabled": true,
-                "call_to_actions": [
-                    {
-                        "title": "Znovu zadat údaje",
-                        "type": "postback",
-                        "payload": "getStartedPostback"
-                    },
-                    {
-                        "type": "web_url",
-                        "title": "Stránka se změnami rozvrhu",
-                        "url": CLASS_DATA_URL,
-                        "webview_height_ratio": "full"
-                    },
-                    {
-                        "title": "Odhlásit se",
-                        "type": "postback",
-                        "payload": "unsubscribe"
-                    }
-                ]
+        console.log("Setting profile: " + JSON.stringify(request_body));
+
+        request({
+            "uri": "https://graph.facebook.com/v2.6/me/messenger_profile",
+            "qs": { "access_token": PAGE_ACCESS_TOKEN },
+            "method": "POST",
+            "json": request_body
+        }, (err, res, body) => {
+            if (!err) {
+                console.log("Profile API set with response: " + JSON.stringify(body));
+            } else {
+                console.error("Unable to access profile api:" + err);
             }
-        ]
-    };
-
-    console.log("Setting profile: " + JSON.stringify(request_body));
-
-    request({
-        "uri": "https://graph.facebook.com/v2.6/me/messenger_profile",
-        "qs": { "access_token": PAGE_ACCESS_TOKEN },
-        "method": "POST",
-        "json": request_body
-    }, (err, res, body) => {
-        if (!err) {
-            console.log("Profile API set with response: " + JSON.stringify(body));
-        } else {
-            console.error("Unable to access profile api:" + err);
-        }
-    });
+        });
+    })
 }
 
-function removePersistentMenu(){
-    console.log('removing menu...');
-    request({
-        url: 'https://graph.facebook.com/v2.6/me/thread_settings',
-        qs: { access_token: PAGE_ACCESS_TOKEN },
-        method: 'POST',
-        json: {
-            setting_type : "call_to_actions",
-            thread_state : "existing_thread",
-            call_to_actions:[ ]
-        }
+function removePersistentMenu() {
+    return new Promise(function (resolve, reject) {
+        console.log('Removing menu...');
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/thread_settings',
+            qs: { access_token: PAGE_ACCESS_TOKEN },
+            method: 'POST',
+            json: {
+                setting_type : "call_to_actions",
+                thread_state : "existing_thread",
+                call_to_actions:[ ]
+            }
 
-    }, function(error, response, body) {
-        console.log(response);
-        if (error) {
-            console.log('Error sending messages: ', error);
-        } else if (response.body.error) {
-            console.log('Error: ', response.body.error);
-        } else {
-            console.log('Success: ', JSON.stringify(response.body));
-        }
+        }, function(error, response, body) {
+            console.log(response);
+            if (error) {
+                console.log('Error sending messages: ', error);
+                reject(new Error(error));
+            } else if (response.body.error) {
+                console.log('Error: ', response.body.error);
+                reject(new Error(error));
+            } else {
+                console.log('Menu removed successfully...');
+                resolve();
+            }
+        });
     });
 }
 
