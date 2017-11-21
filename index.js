@@ -58,7 +58,7 @@ function fetchData() {
 function setUpDataHook() {
     db = require('./lib/db');
     db.initDb('db.json').then(function() {
-        schedule.scheduleJob('* * * * *', fetchData); // every minute
+        schedule.scheduleJob('*/5 * * * *', fetchData); // every 5th minute
         fetchData();
         // Sets server port and logs message on success
         app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
