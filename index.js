@@ -158,11 +158,10 @@ function handlePostback(sender_psid, received_postback) {
 
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
-
         callSendAPI(sender_psid, getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b));
     } else if (payload === "unsubscribe") {
         db.deleteUser(sender_psid);
-        callSendAPI(sender_psid, "OK, už ti nebudu nic posílat. Těšilo mě ;)");
+        callSendAPI(sender_psid, "OK, už ti nebudu nic posílat. Těšilo mě, měj se ;)");
     } else if (payload.startsWith("response-")) {
         let responseData = payload.match(/response-([^\-]+)-(.*)/);
         let responseTo = responseData[1];
@@ -209,7 +208,7 @@ function getSelectionMessage(title, options, createPayload) {
 }
 
 function sendNotificationMessage(user) {
-    let messageText = 'Pssst, na ' + CLASS_DATA_URL + ' je něco nového pro ' + user.year + '. ročník ' + (user.educationType == 'D' ? 'denní' : 'kombinované') + ' formy oboru ' + user.branch + '. Pokud už nechceš dostávat tyhle zprávy tak si mě smaž nebo odpověz "nechci".';
+    let messageText = 'Pssst, na ' + CLASS_DATA_URL + ' je něco nového pro ' + user.year + '. ročník ' + (user.educationType == 'D' ? 'denní' : 'kombinované') + ' formy oboru ' + user.branch + '. Pokud už nechceš dostávat tyhle zprávy tak vyber možnost "odhlásit se" v menu.';
     callSendAPI(user.psid, { text: messageText }, 'NON_PROMOTIONAL_SUBSCRIPTION');
 }
 
@@ -241,6 +240,9 @@ function callSendAPI(psid, response, messageType) {``
 
 function setUpBotProfile() {
     let request_body = {
+        "target_audience": {
+            "audience_type": "none" // don't show up in bot discovery
+        },
         "greeting": [{
             "locale":"default",
             "text":"Ahoj!"
