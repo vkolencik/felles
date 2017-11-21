@@ -239,6 +239,8 @@ function callSendAPI(psid, response, messageType) {``
 }
 
 function setUpBotProfile() {
+    removePersistentMenu();
+
     let request_body = {
         "target_audience": {
             "audience_type": "none" // don't show up in bot discovery
@@ -292,6 +294,30 @@ function setUpBotProfile() {
             console.log("Profile API set with response: " + JSON.stringify(body));
         } else {
             console.error("Unable to access profile api:" + err);
+        }
+    });
+}
+
+function removePersistentMenu(){
+    console.log('removing menu...');
+    request({
+        url: 'https://graph.facebook.com/v2.6/me/thread_settings',
+        qs: { access_token: PAGE_ACCESS_TOKEN },
+        method: 'POST',
+        json: {
+            setting_type : "call_to_actions",
+            thread_state : "existing_thread",
+            call_to_actions:[ ]
+        }
+
+    }, function(error, response, body) {
+        console.log(response);
+        if (error) {
+            console.log('Error sending messages: ', error);
+        } else if (response.body.error) {
+            console.log('Error: ', response.body.error);
+        } else {
+            console.log('Success: ', JSON.stringify(response.body));
         }
     });
 }
