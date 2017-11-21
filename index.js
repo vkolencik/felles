@@ -8,11 +8,10 @@ const fs = require('fs');
 
 const dataParser = require('./lib/data_parser');
 var db;
-const constants = require('./lib/constants');
+const consts = require('./lib/constants');
 
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const CLASS_DATA_URL = 'http://www.skolamedea.cz/studenti/zmeny-v-rozvrhu-2/';
 const testInstance = true;
 
 // Process application/x-www-form-urlencoded
@@ -48,7 +47,7 @@ function fetchData() {
             processClassData(data);
         });
     } else {
-        request(CLASS_DATA_URL, function (error, response, body) {
+        request(consts.CLASS_DATA_URL, function (error, response, body) {
             if (!error) {
                 processClassData(body);
             }
@@ -209,7 +208,7 @@ function getSelectionMessage(title, options, createPayload) {
 }
 
 function sendNotificationMessage(user) {
-    let messageText = 'Pssst, na ' + CLASS_DATA_URL + ' je něco nového pro ' + user.year + '. ročník ' + (user.educationType == 'D' ? 'denní' : 'kombinované') + ' formy oboru ' + user.branch + '. Pokud už nechceš dostávat tyhle zprávy tak vyber možnost "odhlásit se" v menu.';
+    let messageText = 'Pssst, na ' + consts.CLASS_DATA_URL + ' je něco nového pro ' + user.year + '. ročník ' + (user.educationType == 'D' ? 'denní' : 'kombinované') + ' formy oboru ' + user.branch + '. Pokud už nechceš dostávat tyhle zprávy tak vyber možnost "odhlásit se" v menu.';
     callSendAPI(user.psid, { text: messageText }, 'NON_PROMOTIONAL_SUBSCRIPTION');
 }
 
@@ -241,7 +240,7 @@ function callSendAPI(psid, response, messageType) {``
 
 function setUpBotProfile() {
     removePersistentMenu().then(function() {
-        let request_body = constants.BOT_PROFILE;
+        let request_body = consts.BOT_PROFILE;
 
         console.log("Setting profile: " + JSON.stringify(request_body));
 
