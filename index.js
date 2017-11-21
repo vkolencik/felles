@@ -281,7 +281,7 @@ function setUpBotProfile() {
         "json": request_body
     }, (err, res, body) => {
         if (!err) {
-            console.log("Profile API set successfully")
+            console.log("Profile API set with response: " + body);
         } else {
             console.error("Unable to access profile api:" + err);
         }
