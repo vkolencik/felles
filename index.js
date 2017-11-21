@@ -255,28 +255,22 @@ function setUpBotProfile() {
                 "locale": "default",
                 "composer_input_disabled": true,
                 "call_to_actions": [
-
                     {
-                        "title": "XXX",
+                        "title": "Znovu zadat údaje",
                         "type": "postback",
-                        "payload": "XXX"
+                        "payload": "getStartedPostback"
+                    },
+                    {
+                        "type": "web_url",
+                        "title": "Stránka se změnami rozvrhu",
+                        "url": CLASS_DATA_URL,
+                        "webview_height_ratio": "full"
+                    },
+                    {
+                        "title": "Odhlásit se",
+                        "type": "postback",
+                        "payload": "unsubscribe"
                     }
-                    // {
-                    //     "title": "Znovu zadat údaje",
-                    //     "type": "postback",
-                    //     "payload": "getStartedPostback"
-                    // },
-                    // {
-                    //     "type": "web_url",
-                    //     "title": "Stránka se změnami rozvrhu",
-                    //     "url": CLASS_DATA_URL,
-                    //     "webview_height_ratio": "full"
-                    // },
-                    // {
-                    //     "title": "Odhlásit se",
-                    //     "type": "postback",
-                    //     "payload": "unsubscribe"
-                    // }
                 ]
             }
         ]
