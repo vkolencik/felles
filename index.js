@@ -247,7 +247,7 @@ function setUpBotProfile() {
             "locale":"default",
             "text":"Ahoj!"
         }],
-        "get_started": { "payload" : "getStartedPostback" },
+        "get_started": { "payload" : "getStartedPostback" }/*,
         "persistent_menu": [
             {
                 "locale": "default",
@@ -271,7 +271,7 @@ function setUpBotProfile() {
                     }
                 ]
             }
-        ]
+        ]*/
     };
 
     request({
