@@ -280,6 +280,8 @@ function setUpBotProfile() {
         ]
     };
 
+    console.log("Setting profile: " + JSON.stringify(request_body));
+
     request({
         "uri": "https://graph.facebook.com/v2.6/me/messenger_profile",
         "qs": { "access_token": PAGE_ACCESS_TOKEN },
