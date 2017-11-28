@@ -157,7 +157,7 @@ function handlePostback(sender_psid, received_postback) {
     console.log("Received postback: " + payload);
 
     if (payload === "getStartedPostback") {
-        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles!"});
+        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles! Když mi řekneš co studuješ, tak tě na oplátku budu průběžně informovat o změnách rozvrhu."});
         callSendAPI(sender_psid, getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b));
     } else if (payload === "unsubscribe") {
         db.deleteUser(sender_psid);
