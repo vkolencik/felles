@@ -75,7 +75,7 @@ function setUpDataHook() {
         app.listen(process.env.PORT || 1337, () => logger.info('webhook is listening'));
     });
 }
-
+SVGZoomAndPan
 app.get('/createTestUser', (req, res) => {
     db.saveUserBranch(1, 'Zdravotnický záchranář');
     db.saveUserYear(1, 1);
