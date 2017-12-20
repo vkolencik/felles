@@ -25,6 +25,7 @@
     "lib": "^3.0.1",
     "lokijs": "^1.5.1",
     "node-schedule": "^1.2.5",
-    "request": "^2.83.0"
+    "request": "^2.83.0",
+    "winston": "^3.0.0-rc1"
   }
 }

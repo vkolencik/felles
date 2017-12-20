@@ -9,7 +9,7 @@ const fs = require('fs');
 const dataParser = require('./lib/data_parser');
 var db;
 const consts = require('./lib/constants');
-
+const logger = require('./lib/logger');
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const testInstance = false;
@@ -21,15 +21,26 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 
+function logClassDataHtml(body) {
+    var now = new Date();
+    var filename = consts.classDataSnapshotsDir + '/' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' +  now.getDate() + '-' + now.getHours() + now.getMinutes() + now.getSeconds();
+    if (!path.existsSync(consts.classDataSnapshotsDir)) {
+        fs.mkdirSync(consts.classDataSnapshotsDir, 0o744);
+    }
+
+    fs.writeFile('filename', body, undefined, err => logger.error('Error writing html data', err));
+}
+
 function processClassData(body) {
+    logClassDataHtml(body);
     let classesData = dataParser.parseClassesHtml(body);
     classesData.forEach(classData => {
         let existingData = db.getClass(classData.classBranch, classData.classYear, classData.classEducationType);
         if (existingData.classDataHash !== classData.classDataHash) {
             //notify change
-            console.log("CLASS DATA CHANGED: " + JSON.stringify(classData));
+            logger.debug('Class data changed', JSON.stringify(classData));
             let usersToNotify = db.getUsersByClass(classData);
-            console.log('Users to notify: ' + usersToNotify);
+            logger.debug('Notifying users', usersToNotify);
             usersToNotify.forEach(u => sendNotificationMessage(u));
             existingData.classDataHash = classData.classDataHash;
             existingData.lastUpdated = new Date();
@@ -61,7 +72,7 @@ function setUpDataHook() {
         schedule.scheduleJob('*/5 * * * *', fetchData); // every 5th minute
         fetchData();
         // Sets server port and logs message on success
-        app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
+        app.listen(process.env.PORT || 1337, () => logger.info('webhook is listening'));
     });
 }
 
@@ -97,11 +108,11 @@ app.post('/webhook', (req, res) => {
 
             // Gets the body of the webhook event
             let webhook_event = entry.messaging[0];
-            console.log(webhook_event);
+            logger.silly('Webhook event', webhook_event);
 
             // Get the sender PSID
             let sender_psid = webhook_event.sender.id;
-            console.log('Sender PSID: ' + sender_psid);
+            logger.silly('Sender PSID', sender_psid);
 
             // Check if the event is a message or postback and
             // pass the event to the appropriate handler function
@@ -136,7 +147,7 @@ app.get('/webhook', (req, res) => {
         // Checks the mode and token sent is correct
         if (mode === 'subscribe' && token === VERIFY_TOKEN) {
             // Responds with the challenge token from the request
-            console.log('WEBHOOK_VERIFIED');
+            logger.info('WEBHOOK_VERIFIED');
             res.status(200).send(challenge);
         } else {
             // Responds with '403 Forbidden' if verify tokens do not match
@@ -154,7 +165,7 @@ function handlePostback(sender_psid, received_postback) {
     // Get the payload for the postback
     let payload = received_postback.payload;
 
-    console.log("Received postback: " + payload);
+    logger.debug("Received postback: " + payload);
 
     if (payload === "getStartedPostback") {
         callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles! Když mi řekneš co studuješ, tak tě na oplátku budu průběžně informovat o změnách rozvrhu."});
@@ -167,11 +178,11 @@ function handlePostback(sender_psid, received_postback) {
         let responseTo = responseData[1];
         let responseValue = responseData[2];
 
-        console.log(responseData);
+        logger.silly(responseData);
 
         switch(responseTo) {
             case 'branch':
-                console.log('Setting branch of ' + sender_psid + ' to ' + responseValue);
+                logger.debug('Setting branch of ' + sender_psid + ' to ' + responseValue);
                 db.saveUserBranch(sender_psid, responseValue);
                 callSendAPI(sender_psid, getSelectionMessage("Cajk, a ročník?", db.getYears().sort().slice(0, 3).map(y => y.toString()), y => "response-year-" + y));
                 break;
@@ -213,7 +224,7 @@ function sendNotificationMessage(user) {
 }
 
 function callSendAPI(psid, response, messageType) {``
-    console.log('Sending message: ' + JSON.stringify(response));
+    logger.debug('Sending message: ' + JSON.stringify(response));
     // Construct the message body
     let request_body = {
         "recipient": {
@@ -231,18 +242,18 @@ function callSendAPI(psid, response, messageType) {``
         "json": request_body
     }, (err, res, body) => {
         if (!err) {
-        console.log('message sent!')
-    } else {
-        console.error("Unable to send message:" + err);
-    }
-});
+            logger.debug('message sent!')
+        } else {
+            logger.error("Unable to send message", err);
+        }
+    });
 }
 
 function setUpBotProfile() {
     removePersistentMenu().then(function() {
         let request_body = consts.BOT_PROFILE;
 
-        console.log("Setting profile: " + JSON.stringify(request_body));
+        logger.debug("Setting profile", JSON.stringify(request_body));
 
         request({
             "uri": "https://graph.facebook.com/v2.6/me/messenger_profile",
@@ -251,9 +262,9 @@ function setUpBotProfile() {
             "json": request_body
         }, (err, res, body) => {
             if (!err) {
-                console.log("Profile API set with response: " + JSON.stringify(body));
+                logger.debug("Profile API set", JSON.stringify(body));
             } else {
-                console.error("Unable to access profile api:" + err);
+                logger.error("Unable to access profile api", err);
             }
         });
     })
@@ -261,7 +272,7 @@ function setUpBotProfile() {
 
 function removePersistentMenu() {
     return new Promise(function (resolve, reject) {
-        console.log('Removing menu...');
+        logger.debug('Removing menu...');
         request({
             url: 'https://graph.facebook.com/v2.6/me/thread_settings',
             qs: { access_token: PAGE_ACCESS_TOKEN },
@@ -273,20 +284,22 @@ function removePersistentMenu() {
             }
 
         }, function(error, response, body) {
-            console.log(response);
+            logger.silly('response', response);
             if (error) {
-                console.log('Error sending messages: ', error);
+                logger.error('Error sending messages: ', error);
                 reject(new Error(error));
             } else if (response.body.error) {
-                console.log('Error: ', response.body.error);
+                logger.error('Error: ', response.body.error);
                 reject(new Error(error));
             } else {
-                console.log('Menu removed successfully...');
+                logger.info('Menu removed successfully...');
                 resolve();
             }
         });
     });
 }
 
-setUpBotProfile();
+if (!testInstance) {
+    setUpBotProfile();
+}
 setUpDataHook();
