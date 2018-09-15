@@ -9,10 +9,10 @@ const fs = require('fs');
 const dataParser = require('./lib/data_parser');
 var db;
 const consts = require('./lib/constants');
-import logger from './lib/logger';
+const logger = require('./lib/logger');
 const app = express();
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const testInstance = false;
+const testInstance = process.env.DEV_INSTANCE;
 
 // Process application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
@@ -24,11 +24,11 @@ app.use(bodyParser.json());
 function logClassDataHtml(body) {
     var now = new Date();
     var filename = consts.classDataSnapshotsDir + '/' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' +  now.getDate() + '-' + now.getHours() + now.getMinutes() + now.getSeconds();
-    if (!path.existsSync(consts.classDataSnapshotsDir)) {
+    if (!fs.existsSync(consts.classDataSnapshotsDir)) {
         fs.mkdirSync(consts.classDataSnapshotsDir, 0o744);
     }
 
-    fs.writeFile('filename', body, undefined, err => logger.error('Error writing html data', err));
+    fs.writeFile(filename, body, undefined, err => err && logger.error('Error saving html snapshot', err));
 }
 
 function processClassData(body) {
@@ -50,6 +50,7 @@ function processClassData(body) {
 }
 
 function fetchData() {
+    logger.info('Fetching class data...')
     if (testInstance) {
         fs.readFile( __dirname + '/sample_page.html', function (err, data) {
             if (err) {
@@ -61,6 +62,8 @@ function fetchData() {
         request(consts.CLASS_DATA_URL, function (error, response, body) {
             if (!error) {
                 processClassData(body);
+            } else {
+                logger.error('Error getting class data from ' + consts.CLASS_DATA_URL, error)
             }
         });
     }
@@ -97,7 +100,8 @@ app.get('/years', (req, res) => {
 
 // Creates the endpoint for our webhook
 app.post('/webhook', (req, res) => {
-
+    logger.debug('Webhook received message ' + req.body.object);
+    logger.silly('Full received message: ' + req.body);
     let body = req.body;
 
     // Checks this is an event from a page subscription
@@ -108,11 +112,11 @@ app.post('/webhook', (req, res) => {
 
             // Gets the body of the webhook event
             let webhook_event = entry.messaging[0];
-            logger.silly('Webhook event', webhook_event);
+            logger.debug('Webhook event', webhook_event);
 
             // Get the sender PSID
             let sender_psid = webhook_event.sender.id;
-            logger.silly('Sender PSID', sender_psid);
+            logger.debug('Sender PSID', sender_psid);
 
             // Check if the event is a message or postback and
             // pass the event to the appropriate handler function
@@ -299,6 +303,7 @@ function removePersistentMenu() {
     });
 }
 
+console.log('FELLES version ' + require('./package.json').version);
 logger.info('Starting Felles...')
 if (!testInstance) {
     setUpBotProfile();
