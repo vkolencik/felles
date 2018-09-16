@@ -227,7 +227,7 @@ function sendNotificationMessage(user) {
     callSendAPI(user.psid, { text: messageText }, 'NON_PROMOTIONAL_SUBSCRIPTION');
 }
 
-function callSendAPI(psid, response, messageType) {``
+function callSendAPI(psid, response, messageType) {
     logger.debug('Sending reply message to ' + psid)
     logger.silly('Full message body:\n' + JSON.stringify(response) + '\n\n');
     // Construct the message body
