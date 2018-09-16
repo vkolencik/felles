@@ -172,8 +172,9 @@ function handlePostback(sender_psid, received_postback) {
     logger.debug("Received postback: " + payload);
 
     if (payload === "getStartedPostback") {
-        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles! Když mi řekneš co studuješ, tak tě na oplátku budu průběžně informovat o změnách rozvrhu."});
-        callSendAPI(sender_psid, getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b));
+        callSendAPI(sender_psid, {"text": "Ahoj, já jsem Felles! Když mi řekneš co studuješ, tak tě na oplátku budu průběžně informovat o změnách rozvrhu."})
+            .then(() =>
+                callSendAPI(sender_psid, getSelectionMessage("Povíš mi, z jakého jsi oboru?", db.getBranches(), b => "response-branch-" + b)));
     } else if (payload === "unsubscribe") {
         db.deleteUser(sender_psid);
         callSendAPI(sender_psid, {text: "OK, už ti nebudu nic posílat. Těšilo mě, měj se ;)"});
@@ -240,18 +241,23 @@ function callSendAPI(psid, response, messageType) {
     };
 
     // Send the HTTP request to the Messenger Platform
-    request({
-        "uri": "https://graph.facebook.com/v2.6/me/messages",
-        "qs": { "access_token": PAGE_ACCESS_TOKEN },
-        "method": "POST",
-        "json": request_body
-    }, (err, res, body) => {
-        if (!err) {
-            logger.debug('Message response sent')            
-        } else {
-            logger.error("Unable to send response message", err);
-        }
-        logger.silly('Server responded with code ' + res.statusCode + ':\n'+JSON.stringify(res.body))
+    return new Promise(function (resolve, reject) {
+        request({
+            "uri": "https://graph.facebook.com/v2.6/me/messages",
+            "qs": { "access_token": PAGE_ACCESS_TOKEN },
+            "method": "POST",
+            "json": request_body
+        }, (err, res, body) => {
+            logger.silly('Server responded with code ' + res.statusCode + ':\n' + JSON.stringify(res.body))
+
+            if (res.statusCode < 300 && !err) {
+                logger.debug('Message response sent');
+                resolve();
+            } else {
+                logger.error("Unable to send response message", err);
+                reject(err);
+            }
+        });
     });
 }
 
