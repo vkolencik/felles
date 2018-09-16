@@ -101,7 +101,7 @@ app.get('/years', (req, res) => {
 // Creates the endpoint for our webhook
 app.post('/webhook', (req, res) => {
     logger.debug('Webhook received message ' + req.body.object);
-    logger.silly('Full received message: ' + req.body);
+    logger.silly('Full received message:\n' + JSON.stringify(req.body) + '\n\n');
     let body = req.body;
 
     // Checks this is an event from a page subscription
@@ -228,7 +228,8 @@ function sendNotificationMessage(user) {
 }
 
 function callSendAPI(psid, response, messageType) {``
-    logger.debug('Sending message: ' + JSON.stringify(response));
+    logger.debug('Sending reply message to ' + psid)
+    logger.silly('Full message body:\n' + JSON.stringify(response) + '\n\n');
     // Construct the message body
     let request_body = {
         "recipient": {
@@ -246,7 +247,7 @@ function callSendAPI(psid, response, messageType) {``
         "json": request_body
     }, (err, res, body) => {
         if (!err) {
-            logger.debug('message sent!')
+            logger.debug('Message sent!')
         } else {
             logger.error("Unable to send message", err);
         }
@@ -257,7 +258,7 @@ function setUpBotProfile() {
     removePersistentMenu().then(function() {
         let request_body = consts.BOT_PROFILE;
 
-        logger.debug("Setting profile", JSON.stringify(request_body));
+        logger.debug("Setting bot profile: ", JSON.stringify(request_body));
 
         request({
             "uri": "https://graph.facebook.com/v2.6/me/messenger_profile",
