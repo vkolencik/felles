@@ -116,7 +116,7 @@ app.post('/webhook', (req, res) => {
 
             // Get the sender PSID
             let sender_psid = webhook_event.sender.id;
-            logger.debug('Sender PSID', sender_psid);
+            logger.debug('Sender PSID: ' + sender_psid);
 
             // Check if the event is a message or postback and
             // pass the event to the appropriate handler function
@@ -247,10 +247,11 @@ function callSendAPI(psid, response, messageType) {
         "json": request_body
     }, (err, res, body) => {
         if (!err) {
-            logger.debug('Message sent!')
+            logger.debug('Message response sent')            
         } else {
-            logger.error("Unable to send message", err);
+            logger.error("Unable to send response message", err);
         }
+        logger.silly('Server responded with code ' + res.statusCode + ':\n'+JSON.stringify(res.body))
     });
 }
 
