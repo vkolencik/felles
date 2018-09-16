@@ -311,8 +311,8 @@ function removePersistentMenu() {
     });
 }
 
-console.log('FELLES version ' + require('./package.json').version);
-logger.info('Starting Felles...')
+console.log('This is Felles version ' + require('./package.json').version);
+logger.info(`Starting Felles (environment: ${testInstance ? "DEVELOPMENT" : "PRODUCTION"})`)
 if (!testInstance) {
     setUpBotProfile();
 }
