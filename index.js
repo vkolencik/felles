@@ -52,7 +52,7 @@ function processClassData(body) {
 function fetchData() {
     logger.info('Fetching class data...')
     if (testInstance) {
-        fs.readFile( __dirname + '/sample_page.html', function (err, data) {
+        fs.readFile( __dirname + 'test/sample_class_data.html', function (err, data) {
             if (err) {
                 throw err;
             }
